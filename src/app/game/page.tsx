@@ -45,11 +45,11 @@ type GameData = {
 
 type GuessResult = {
   result:
-  | 'color_correct'
-  | 'color_wrong'
-  | 'full_correct'
-  | 'full_wrong'
-  | 'won'
+    | 'color_correct'
+    | 'color_wrong'
+    | 'full_correct'
+    | 'full_wrong'
+    | 'won'
   correct: boolean
   guess_mode: GuessMode
   drew_card: boolean
@@ -335,9 +335,9 @@ export default function GamePage() {
     if (!gameId) return
 
     async function loadInitialGameData() {
-      await loadGameState(gameId)
-      await loadPlayersForGame(gameId)
-      await loadTilesForGame(gameId)
+      await loadGameState(gameId!)
+      await loadPlayersForGame(gameId!)
+      await loadTilesForGame(gameId!)
     }
 
     loadInitialGameData()
@@ -380,9 +380,9 @@ export default function GamePage() {
           filter: `game_id=eq.${gameId}`,
         },
         async () => {
-          await loadPlayersForGame(gameId)
-          await loadTilesForGame(gameId)
-          await loadGameState(gameId)
+          await loadPlayersForGame(gameId!)
+          await loadTilesForGame(gameId!)
+          await loadGameState(gameId!)
         },
       )
       .on(
@@ -394,7 +394,7 @@ export default function GamePage() {
           filter: `game_id=eq.${gameId}`,
         },
         async () => {
-          await loadTilesForGame(gameId)
+          await loadTilesForGame(gameId!)
         },
       )
       .on(
@@ -406,7 +406,7 @@ export default function GamePage() {
           filter: `game_id=eq.${gameId}`,
         },
         async () => {
-          await loadTilesForGame(gameId)
+          await loadTilesForGame(gameId!)
         },
       )
       .on(
@@ -418,7 +418,7 @@ export default function GamePage() {
           filter: `game_id=eq.${gameId}`,
         },
         async () => {
-          await loadTilesForGame(gameId)
+          await loadTilesForGame(gameId!)
         },
       )
       .on(
@@ -446,7 +446,7 @@ export default function GamePage() {
           setSecondsLeft(20)
           setIsTimingOut(false)
 
-          await loadTilesForGame(gameId)
+          await loadTilesForGame(gameId!)
         },
       )
       .subscribe((status) => {
@@ -479,7 +479,7 @@ export default function GamePage() {
         const { data: drawnTileId, error } = await supabase.rpc(
           'draw_card_for_turn',
           {
-            p_game_id: gameId,
+            p_game_id: gameId!,
             p_player_id: myPlayerId,
           },
         )
@@ -487,7 +487,7 @@ export default function GamePage() {
         if (error) throw new Error(error.message)
         if (cancelled) return
 
-        await loadTilesForGame(gameId)
+        await loadTilesForGame(gameId!)
         if (cancelled) return
 
         setMessage(
@@ -590,7 +590,7 @@ export default function GamePage() {
 
       try {
         const { data, error } = await supabase.rpc('timeout_turn', {
-          p_game_id: gameId,
+          p_game_id: gameId!,
           p_player_id: myPlayerId,
           p_turn_number: currentTurn,
         })
@@ -613,8 +613,8 @@ export default function GamePage() {
         setItemMode(null)
         lastDrawKeyRef.current = null
 
-        await loadGameState(gameId)
-        await loadTilesForGame(gameId)
+        await loadGameState(gameId!)
+        await loadTilesForGame(gameId!)
       } catch (error) {
         if (!cancelled) {
           setMessage(
@@ -669,16 +669,16 @@ export default function GamePage() {
           setMyPlayerId(savedPlayer.id)
           setNickname(savedPlayer.nickname)
 
-          await loadGameState(gameId)
-          await loadPlayersForGame(gameId)
-          await loadTilesForGame(gameId)
+          await loadGameState(gameId!)
+          await loadPlayersForGame(gameId!)
+          await loadTilesForGame(gameId!)
           return
         }
 
         localStorage.removeItem(playerStorageKey)
       }
 
-      const latestPlayers = await loadPlayersForGame(gameId)
+      const latestPlayers = await loadPlayersForGame(gameId!)
 
       if (latestPlayers.length >= 2) {
         setMessage('This room already has two players.')
@@ -690,7 +690,7 @@ export default function GamePage() {
       const { data: player, error: playerError } = await supabase
         .from('players')
         .insert({
-          game_id: gameId,
+          game_id: gameId!,
           nickname: nickname.trim(),
           player_order: playerOrder,
         })
@@ -711,7 +711,7 @@ export default function GamePage() {
 
         const { error: startGameError } = await supabase.rpc(
           'start_rematch',
-          { p_game_id: gameId },
+          { p_game_id: gameId! },
         )
 
         if (startGameError) {
@@ -726,9 +726,9 @@ export default function GamePage() {
         setMessage('Game started. The first player was selected randomly.')
       }
 
-      await loadGameState(gameId)
-      await loadPlayersForGame(gameId)
-      await loadTilesForGame(gameId)
+      await loadGameState(gameId!)
+      await loadPlayersForGame(gameId!)
+      await loadTilesForGame(gameId!)
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : 'Could not join game.',
@@ -750,7 +750,6 @@ export default function GamePage() {
       isDrawing ||
       isUsingItem ||
       isTimingOut ||
-      gameStatus === 'finished' ||
       tile.reveal_level === 'full'
     ) {
       return
@@ -820,7 +819,7 @@ export default function GamePage() {
 
     try {
       const { data, error } = await supabase.rpc('use_reveal_item', {
-        p_game_id: gameId,
+        p_game_id: gameId!,
         p_player_id: myPlayerId,
         p_target_tile_id: selectedTile,
         p_reveal_type: itemMode,
@@ -847,8 +846,8 @@ export default function GamePage() {
       setItemMode(null)
       clearSelection()
 
-      await loadGameState(gameId)
-      await loadTilesForGame(gameId)
+      await loadGameState(gameId!)
+      await loadTilesForGame(gameId!)
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : 'Could not use item.',
@@ -881,7 +880,7 @@ export default function GamePage() {
 
     try {
       const { data, error } = await supabase.rpc('make_guess', {
-        p_game_id: gameId,
+        p_game_id: gameId!,
         p_player_id: myPlayerId,
         p_target_tile_id: selectedTile,
         p_guess_mode: guessMode,
@@ -917,8 +916,8 @@ export default function GamePage() {
       clearSelection()
       lastDrawKeyRef.current = null
 
-      await loadGameState(gameId)
-      await loadTilesForGame(gameId)
+      await loadGameState(gameId!)
+      await loadTilesForGame(gameId!)
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : 'Could not submit guess.',
@@ -979,7 +978,7 @@ export default function GamePage() {
       setMessage('Both players accepted. Shuffling a new deck...')
 
       const { error: rematchError } = await supabase.rpc('start_rematch', {
-        p_game_id: gameId,
+        p_game_id: gameId!,
       })
 
       if (rematchError) throw new Error(rematchError.message)
@@ -991,8 +990,8 @@ export default function GamePage() {
       clearSelection()
       setSecondsLeft(20)
 
-      await loadGameState(gameId)
-      await loadTilesForGame(gameId)
+      await loadGameState(gameId!)
+      await loadTilesForGame(gameId!)
 
       setMessage('Rematch started. Both Reveal Items are restored.')
     } catch (error) {
@@ -1176,7 +1175,6 @@ export default function GamePage() {
               <span className="rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2 text-slate-300">
                 Players <b className="ml-1 text-white">{players.length}/2</b>
               </span>
-
               <span className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-cyan-200">
                 Deck <b className="ml-1 text-white">{deckCount}</b>
               </span>
