@@ -343,19 +343,23 @@ export default function GamePage() {
     loadInitialGameData()
   }, [gameId])
 
-  useEffect(() => {
+    useEffect(() => {
     if (!gameId || !myPlayerId || !playerStorageKey) return
+
+    const currentGameId = gameId
+    const currentPlayerId = myPlayerId
+    const currentStorageKey = playerStorageKey
 
     async function validateSavedPlayer() {
       const { data, error } = await supabase
         .from('players')
         .select('id, nickname')
-        .eq('id', myPlayerId)
-        .eq('game_id', gameId)
+        .eq('id', currentPlayerId)
+        .eq('game_id', currentGameId)
         .maybeSingle()
 
       if (error || !data) {
-        localStorage.removeItem(playerStorageKey)
+        localStorage.removeItem(currentStorageKey)
         setMyPlayerId(null)
         return
       }
