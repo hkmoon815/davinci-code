@@ -1,7 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 type GameStatus = 'waiting' | 'playing' | 'finished'
@@ -82,7 +82,7 @@ const purpleButton =
 const secondaryButton =
   'rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-3 text-sm font-bold text-slate-100 transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-400/70'
 
-export default function GamePage() {
+function GamePageContent() {
   const searchParams = useSearchParams()
   const roomCode = searchParams.get('room')
 
@@ -1706,5 +1706,21 @@ export default function GamePage() {
         Deduce carefully. Every card reveals a clue.
       </footer>
     </main>
+  )
+}
+
+export default function GamePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
+          <p className="text-sm font-bold text-slate-300">
+            Loading game...
+          </p>
+        </main>
+      }
+    >
+      <GamePageContent />
+    </Suspense>
   )
 }
