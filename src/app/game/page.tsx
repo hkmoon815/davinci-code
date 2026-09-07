@@ -343,7 +343,7 @@ export default function GamePage() {
     loadInitialGameData()
   }, [gameId])
 
-  useEffect(() => {
+    useEffect(() => {
     if (!gameId || !myPlayerId || !playerStorageKey) return
 
     async function validateSavedPlayer() {
@@ -353,3 +353,15 @@ export default function GamePage() {
         .eq('id', myPlayerId)
         .eq('game_id', gameId)
         .maybeSingle()
+
+      if (error || !data) {
+        localStorage.removeItem(playerStorageKey)
+        setMyPlayerId(null)
+        return
+      }
+
+      setNickname(data.nickname)
+    }
+
+    validateSavedPlayer()
+  }, [gameId, myPlayerId, playerStorageKey])
